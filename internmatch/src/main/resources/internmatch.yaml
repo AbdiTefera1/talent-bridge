@@ -1,0 +1,577 @@
+openapi: 3.1.0
+info:
+  title: InternMatch API
+  description: |
+    Internship & Gig Matching Platform for Ethiopian Students, Fresh Graduates, and Companies.
+    Features: authentication, training courses, internships/gigs posting, applications, company profiles.
+  version: 0.0.1
+  contact:
+    name: Abdi
+    email: your.email@example.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  # - url: https://api.internmatch.et
+  #   description: Production server (add later)
+
+tags:
+  - name: Authentication
+    description: Login, register, token management
+  - name: Opportunities
+    description: Internship & gig postings management
+  - name: Applications
+    description: Apply to opportunities, manage status
+  - name: Trainings
+    description: Courses, enrollments, progress tracking
+  - name: Admin
+    description: Admin-only user management
+  - name: Company
+    description: Company profile management
+  - name: Users
+    description: General user endpoints
+
+paths:
+  # ────────────────────────────────────────────────
+  # Authentication
+  # ────────────────────────────────────────────────
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login and get JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  # ────────────────────────────────────────────────
+  # Opportunities
+  # ────────────────────────────────────────────────
+  /api/opportunities:
+    get:
+      tags: [Opportunities]
+      summary: Get all available opportunities
+      operationId: getAllOpportunities
+      responses:
+        '200':
+          description: List of opportunities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpportunityResponseDto'
+
+    post:
+      tags: [Opportunities]
+      summary: Create a new internship or gig posting
+      description: Only COMPANY users can create
+      operationId: createOpportunity
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityCreateDto'
+      responses:
+        '200':
+          description: Opportunity created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityResponseDto'
+        '401':
+          description: Unauthorized
+
+  /api/opportunities/{id}:
+    get:
+      tags: [Opportunities]
+      summary: Get single opportunity by ID
+      operationId: getOpportunityById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Opportunity details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityResponseDto'
+
+  /api/opportunities/my:
+    get:
+      tags: [Opportunities]
+      summary: Get opportunities posted by current company
+      operationId: getMyOpportunities
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of my opportunities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpportunityResponseDto'
+
+  # ────────────────────────────────────────────────
+  # Applications
+  # ────────────────────────────────────────────────
+  /api/applications:
+    post:
+      tags: [Applications]
+      summary: Apply to an opportunity
+      operationId: apply
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreateDto'
+      responses:
+        '200':
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponseDto'
+
+  /api/applications/my:
+    get:
+      tags: [Applications]
+      summary: Get my applications (for talent)
+      operationId: getMyApplications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of my applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponseDto'
+
+  /api/applications/opportunity/{opportunityId}:
+    get:
+      tags: [Applications]
+      summary: Get all applications for an opportunity (company view)
+      operationId: getApplicationsForOpportunity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponseDto'
+
+  /api/applications/{id}/status:
+    patch:
+      tags: [Applications]
+      summary: Update application status (accept/reject)
+      operationId: updateApplicationStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStatusUpdateDto'
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponseDto'
+
+  # ────────────────────────────────────────────────
+  # Trainings
+  # ────────────────────────────────────────────────
+  /api/trainings:
+    get:
+      tags: [Trainings]
+      summary: Get all trainings
+      operationId: getAllTrainings
+      responses:
+        '200':
+          description: List of trainings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrainingResponseDto'
+
+    post:
+      tags: [Trainings]
+      summary: Create new training (admin/company)
+      operationId: createTraining
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrainingCreateDto'
+      responses:
+        '200':
+          description: Training created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingResponseDto'
+
+  /api/trainings/{trainingId}/enroll:
+    post:
+      tags: [Trainings]
+      summary: Enroll current talent in a training
+      operationId: enrollInTraining
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: trainingId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Enrollment successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingEnrollmentDto'
+
+  /api/trainings/my-enrollments:
+    get:
+      tags: [Trainings]
+      summary: Get my training enrollments
+      operationId: getMyEnrollments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of my enrollments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrainingEnrollmentDto'
+
+  /api/trainings/enrollments/{enrollmentId}/progress:
+    patch:
+      tags: [Trainings]
+      summary: Update progress or mark as completed
+      operationId: updateEnrollmentProgress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentProgressUpdateDto'
+      responses:
+        '200':
+          description: Progress updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingEnrollmentDto'
+
+  # ────────────────────────────────────────────────
+  # Admin & User endpoints (partial)
+  # ────────────────────────────────────────────────
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: List all users (admin only)
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDto'
+
+  /api/users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+
+  # Add more admin endpoints as needed...
+
+components:
+  schemas:
+    # ────────────────────────────────────────────────
+    # Auth
+    # ────────────────────────────────────────────────
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, role]
+      properties:
+        fullName: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        role: { type: string, enum: [TALENT, COMPANY, ADMIN] }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        role: { type: string }
+
+    # ────────────────────────────────────────────────
+    # Opportunity
+    # ────────────────────────────────────────────────
+    OpportunityCreateDto:
+      type: object
+      required: [title, description, type]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [INTERNSHIP, GIG] }
+        isPaid: { type: boolean }
+        salary: { type: number }
+        currency: { type: string, default: ETB }
+        location: { type: string }
+        isRemote: { type: boolean, default: true }
+        requiredExperience: { type: string, enum: [BEGINNER, INTERMEDIATE, ADVANCED] }
+        deadline: { type: string, format: date }
+        requiredSkills: { type: array, items: { type: string } }
+
+    OpportunityResponseDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        companyId: { type: integer, format: int64 }
+        companyName: { type: string }
+        title: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [INTERNSHIP, GIG] }
+        isPaid: { type: boolean }
+        salary: { type: number }
+        currency: { type: string }
+        location: { type: string }
+        isRemote: { type: boolean }
+        requiredExperience: { type: string, enum: [BEGINNER, INTERMEDIATE, ADVANCED] }
+        status: { type: string, enum: [OPEN, CLOSED, FILLED, CANCELLED] }
+        deadline: { type: string, format: date }
+        requiredSkills: { type: array, items: { type: string } }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    # ────────────────────────────────────────────────
+    # Application
+    # ────────────────────────────────────────────────
+    ApplicationCreateDto:
+      type: object
+      required: [opportunityId]
+      properties:
+        opportunityId: { type: integer, format: int64 }
+        coverLetter: { type: string }
+
+    ApplicationResponseDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        opportunityId: { type: integer, format: int64 }
+        opportunityTitle: { type: string }
+        talentId: { type: integer, format: int64 }
+        talentFullName: { type: string }
+        talentEmail: { type: string }
+        status: { type: string, enum: [PENDING, SHORTLISTED, ACCEPTED, REJECTED, WITHDRAWN] }
+        coverLetter: { type: string }
+        appliedAt: { type: string, format: date-time }
+        feedback: { type: string }
+        updatedAt: { type: string, format: date-time }
+
+    ApplicationStatusUpdateDto:
+      type: object
+      properties:
+        status: { type: string, enum: [PENDING, SHORTLISTED, ACCEPTED, REJECTED, WITHDRAWN] }
+        feedback: { type: string }
+
+    # ────────────────────────────────────────────────
+    # Training
+    # ────────────────────────────────────────────────
+    TrainingCreateDto:
+      type: object
+      required: [title, level]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        level: { type: string, enum: [BEGINNER, INTERMEDIATE, ADVANCED] }
+        isPaid: { type: boolean, default: false }
+        price: { type: number }
+        durationHours: { type: integer }
+        contentUrl: { type: string }
+
+    TrainingResponseDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        level: { type: string, enum: [BEGINNER, INTERMEDIATE, ADVANCED] }
+        isPaid: { type: boolean }
+        price: { type: number }
+        durationHours: { type: integer }
+        createdById: { type: integer, format: int64 }
+        createdByName: { type: string }
+        contentUrl: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    TrainingEnrollmentDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        trainingId: { type: integer, format: int64 }
+        trainingTitle: { type: string }
+        talentId: { type: integer, format: int64 }
+        talentName: { type: string }
+        progressPercentage: { type: integer }
+        isCompleted: { type: boolean }
+        enrolledAt: { type: string, format: date-time }
+        completedAt: { type: string, format: date-time }
+
+    EnrollmentProgressUpdateDto:
+      type: object
+      properties:
+        progressPercentage: { type: integer, minimum: 0, maximum: 100 }
+        completed: { type: boolean }
+
+    # ────────────────────────────────────────────────
+    # User / Admin
+    # ────────────────────────────────────────────────
+    UserResponseDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        fullName: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [TALENT, COMPANY, ADMIN] }
+        active: { type: boolean }
+        verified: { type: boolean }
+
+    CompanyProfileResponseDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        companyName: { type: string }
+        industry: { type: string }
+        website: { type: string }
+        description: { type: string }
+        companySize: { type: string }
+        location: { type: string }
+        email: { type: string }
+        fullName: { type: string }
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

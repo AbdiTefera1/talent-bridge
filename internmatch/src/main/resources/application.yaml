@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: internmatch
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/internmatch
+    username: postgres
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+jwt:
+  secret: yourSuperLongSecretKeyHereAtLeast32Characters1234567890abcdef
+  expiration: 86400000   # 24 hours
+
+logging:
+  level:
+    org.hibernate: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+springdoc:
+  packages-to-scan:
+    - com.internmatch
+  swagger-ui:
+    path: /swagger-ui.html           # already default
+    supported-submit-methods: ["get", "post", "put", "delete", "patch"]
+    operations-sorter: alpha         # sort endpoints alphabetically
+    tags-sorter: alpha               # sort tags alphabetically
+    doc-expansion: list              # expand list by default
+
+  api-docs:
+    path: /v3/api-docs               # default
+
+  # Very useful: group APIs (if you have multiple modules / versions)
+  group-configs:
+    - group: 'public'
+      paths-to-match:
+        - /api/auth/**
+        - /api/opportunities/**
+        - /api/applications/**
+        - /api/trainings/**
+        - /api/company/**
+        - /api/users/**
+      display-name: 'Public APIs'
+
+    - group: 'admin'
+      paths-to-match:
+        - /api/admin/**
+      display-name: 'Admin APIs'
+
+  # Show request/response examples nicely
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+  # Add project metadata (shown in Swagger UI)
+  info:
+    title: InternMatch API
+    description: Internship & Gig Matching Platform for Ethiopian Students & Companies
+    version: 0.0.1-SNAPSHOT
+    contact:
+      name: Abdi
+      email: your.email@example.com
+    license:
+      name: Apache 2.0
+      url: http://www.apache.org/licenses/LICENSE-2.0
+

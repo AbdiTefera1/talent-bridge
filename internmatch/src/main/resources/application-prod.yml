@@ -1,0 +1,5 @@
+springdoc:
+  swagger-ui:
+    enabled: false          # disable UI in production
+  api-docs:
+    enabled: false          # or keep only for internal tools
