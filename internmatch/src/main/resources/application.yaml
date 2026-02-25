@@ -6,6 +6,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/internmatch
     username: postgres
     password: 1234
+#    url: jdbc:postgresql://postgresql-abditef.alwaysdata.net:5432/abdi_internmatch
+#    username: abditef
+#    password: abdi1188
 
   jpa:
     hibernate:

@@ -3,3 +3,28 @@ springdoc:
     enabled: false          # disable UI in production
   api-docs:
     enabled: false          # or keep only for internal tools
+
+spring:
+  profiles: alwaysdata
+  datasource:
+    url: jdbc:postgresql://postgresql-abditef.alwaysdata.net:5432/abdi_internmatch
+    username: abditef
+    password: abdi1188
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate        # important: never use update/create in production!
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true   # often needed on AlwaysData
+
+jwt:
+  secret: yourSuperLongSecretKeyHereAtLeast32Characters1234567890abcdef
+  expiration: 86400000   # 24 hours
+
