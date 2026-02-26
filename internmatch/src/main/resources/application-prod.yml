@@ -4,27 +4,29 @@ springdoc:
   api-docs:
     enabled: false          # or keep only for internal tools
 
-spring:
-  profiles: alwaysdata
-  datasource:
-    url: jdbc:postgresql://postgresql-abditef.alwaysdata.net:5432/abdi_internmatch
-    username: abditef
-    password: abdi1188
-    driver-class-name: org.postgresql.Driver
+#spring:
+#  datasource:
+##    url: jdbc:postgresql://postgresql-abditef.alwaysdata.net:5432/abdi_internmatch
+##    username: abditef
+##    password: abdi1188
+#    url: jdbc:postgresql://db.djyqvdjwbnpjptsmxmuw.supabase.co:5432/postgres
+#    username: postgres
+#    password: AbdiTefera@11
+#    driver-class-name: org.postgresql.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate        # important: never use update/create in production!
+#    show-sql: false
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#        format_sql: true
+#        jdbc:
+#          lob:
+#            non_contextual_creation: true   # often needed on AlwaysData
 
-  jpa:
-    hibernate:
-      ddl-auto: validate        # important: never use update/create in production!
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        jdbc:
-          lob:
-            non_contextual_creation: true   # often needed on AlwaysData
-
-jwt:
-  secret: yourSuperLongSecretKeyHereAtLeast32Characters1234567890abcdef
-  expiration: 86400000   # 24 hours
+#jwt:
+#  secret: yourSuperLongSecretKeyHereAtLeast32Characters1234567890abcdef
+#  expiration: 86400000   # 24 hours
 

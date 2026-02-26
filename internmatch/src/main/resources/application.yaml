@@ -1,15 +1,20 @@
 spring:
   application:
     name: internmatch
-
   datasource:
-    url: jdbc:postgresql://localhost:5432/internmatch
-    username: postgres
-    password: 1234
-#    url: jdbc:postgresql://postgresql-abditef.alwaysdata.net:5432/abdi_internmatch
-#    username: abditef
-#    password: abdi1188
-
+    url: jdbc:postgresql://dpg-d6g6uc94tr6s73c0p7cg-a.oregon-postgres.render.com:5432/internmatch
+    username: abditef
+    password: wB9r9BZgay8m4AIRi4Y1LDOzrKOFoisY
+    driver-class-name: org.postgresql.Driver
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/internmatch
+#    username: postgres
+#    password: 1234
+#  datasource:
+#    url: jdbc:postgresql://db.djyqvdjwbnpjptsmxmuw.supabase.co:5432/postgres
+#    username: postgres
+#    password: AbdiTefera@11
+#    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
